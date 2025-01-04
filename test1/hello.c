@@ -74,12 +74,12 @@ static int __init hello_init(void)
         pr_emerg("Hello, world! Time: %llu ns\n", entry->time);
     }
 
-	return 0;
+    return 0;
 }
 
 static void __exit hello_exit(void)
 {
-	/* Do nothing here right now */
+	pr_info("Goodbye, world!!!\n");
 }
 
 module_init(hello_init);
