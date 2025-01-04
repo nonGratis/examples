@@ -32,6 +32,9 @@
 #include <linux/init.h>
 #include <linux/module.h>
 #include <linux/printk.h>
+#include <linux/slab.h>
+#include <linux/ktime.h>
+#include <linux/moduleparam.h>
 
 MODULE_AUTHOR("Andrii Shapovalov <shapovalov.andrii@lll.kpi.ua>");
 MODULE_DESCRIPTION("Hello, world in Linux Kernel Training");
@@ -48,12 +51,18 @@ struct hello_entry {
     ktime_t time;
 };
 
+/* Оголошуємо глобально */
+static LIST_HEAD(hello_list);
+
 /* Ініціалізуємо модуль */
 static int __init hello_init(void)
 {
+	uint i; /* Ініціалізуємо змінну для циклу */
+	struct hello_entry *entry;
+
     pr_info("Hello module loading with print_count=%u\n", print_count);
 
-    /* Validate parameter */
+    /* Та необхідна валідація */
     if (print_count == 0 || (print_count >= 5 && print_count <= 10)) {
         pr_warn("Warning: print_count is in the range of 0, 5-10.\n");
     } else if (print_count > 10) {
@@ -61,9 +70,9 @@ static int __init hello_init(void)
         return -EINVAL;
     }
 
-    /* Print messages and record times */
-    for (uint i = 0; i < print_count; i++) {
-        struct hello_entry *entry = kmalloc(sizeof(*entry), GFP_KERNEL);
+    /* Друк повідомлень і запис часу */
+    for (i = 0; i < print_count; i++) {
+    	entry = kmalloc(sizeof(*entry), GFP_KERNEL);
         if (!entry) {
             pr_err("Failed to allocate memory for list entry.\n");
             return -ENOMEM;
