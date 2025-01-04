@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: BSD/GPL
 
 /*
  * Copyright (c) 2017, GlobalLogic Ukraine LLC
