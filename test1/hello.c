@@ -88,7 +88,16 @@ static int __init hello_init(void)
 
 static void __exit hello_exit(void)
 {
-	pr_info("Goodbye, world!!!\n");
+    struct hello_entry *entry, *tmp;
+
+    pr_info("Hello module unloading.\n");
+
+    /* Звільняємо списки */
+    list_for_each_entry_safe(entry, tmp, &hello_list, list) {
+        pr_info("Time: %llu ns\n", entry->time);
+        list_del(&entry->list);
+        kfree(entry);
+    }
 }
 
 module_init(hello_init);
