@@ -73,10 +73,8 @@ static int __init hello_init(void)
     /* Друк повідомлень і запис часу */
 	for (i = 0; i < print_count; i++) {
 		entry = kmalloc(sizeof(*entry), GFP_KERNEL);
-		if (!entry) {
-			pr_err("Failed to allocate memory for list entry.\n");
+		if (!entry)
 			return -ENOMEM;
-		}
 		entry->time = ktime_get();
 		list_add_tail(&entry->list, &hello_list);
 
