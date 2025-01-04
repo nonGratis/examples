@@ -42,13 +42,13 @@ MODULE_LICENSE("Dual BSD/GPL");
 
 /* Визначаємо параметри */
 static uint print_count = 1; /* Наше звичайне значення */
-module_param(print_count, uint, S_IRUGO);
+module_param(print_count, uint, 0444);
 MODULE_PARM_DESC(print_count, "Number of times to print 'Hello, world!'");
 
-/* Встановлюємо стуртуру (властивсті) базових елементів */
+/* Встановлюємо стуртуру елементів */
 struct hello_entry {
-    struct list_head list;
-    ktime_t time;
+	struct list_head list;
+	ktime_t time;
 };
 
 /* Оголошуємо глобально */
@@ -60,44 +60,44 @@ static int __init hello_init(void)
 	uint i; /* Ініціалізуємо змінну для циклу */
 	struct hello_entry *entry;
 
-    pr_info("Hello module loading with print_count=%u\n", print_count);
+	pr_info("Hello module loading with print_count=%u\n", print_count);
 
     /* Та необхідна валідація */
-    if (print_count == 0 || (print_count >= 5 && print_count <= 10)) {
-        pr_warn("Warning: print_count is in the range of 0, 5-10.\n");
-    } else if (print_count > 10) {
-        pr_err("Error: print_count is greater than 10. Exiting with -EINVAL.\n");
-        return -EINVAL;
-    }
+	if (print_count == 0 || (print_count >= 5 && print_count <= 10)) {
+		pr_warn("Warning: print_count is in the range of 0, 5-10.\n");
+	} else if (print_count > 10) {
+		pr_err("Error: print_count is greater than 10. Exiting with -EINVAL.\n");
+		return -EINVAL;
+	}
 
     /* Друк повідомлень і запис часу */
-    for (i = 0; i < print_count; i++) {
-    	entry = kmalloc(sizeof(*entry), GFP_KERNEL);
-        if (!entry) {
-            pr_err("Failed to allocate memory for list entry.\n");
-            return -ENOMEM;
-        }
-        entry->time = ktime_get();
-        list_add_tail(&entry->list, &hello_list);
+	for (i = 0; i < print_count; i++) {
+		entry = kmalloc(sizeof(*entry), GFP_KERNEL);
+		if (!entry) {
+			pr_err("Failed to allocate memory for list entry.\n");
+			return -ENOMEM;
+		}
+		entry->time = ktime_get();
+		list_add_tail(&entry->list, &hello_list);
 
-        pr_emerg("Hello, world! Time: %llu ns\n", entry->time);
-    }
+		pr_emerg("Hello, world! Time: %llu ns\n", entry->time);
+	}
 
-    return 0;
+	return 0;
 }
 
 static void __exit hello_exit(void)
 {
-    struct hello_entry *entry, *tmp;
+	struct hello_entry *entry, *tmp;
 
-    pr_info("Hello module unloading.\n");
+	pr_info("Hello module unloading.\n");
 
     /* Звільняємо списки */
-    list_for_each_entry_safe(entry, tmp, &hello_list, list) {
-        pr_info("Time: %llu ns\n", entry->time);
-        list_del(&entry->list);
-        kfree(entry);
-    }
+	list_for_each_entry_safe(entry, tmp, &hello_list, list) {
+		pr_info("Time: %llu ns\n", entry->time);
+		list_del(&entry->list);
+		kfree(entry);
+	}
 }
 
 module_init(hello_init);
