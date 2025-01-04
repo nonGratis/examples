@@ -37,6 +37,11 @@ MODULE_AUTHOR("Andrii Shapovalov <shapovalov.andrii@lll.kpi.ua>");
 MODULE_DESCRIPTION("Hello, world in Linux Kernel Training");
 MODULE_LICENSE("Dual BSD/GPL");
 
+/* Визначаємо параметри */
+static uint print_count = 1; /* Наше звичайне значення */
+module_param(print_count, uint, S_IRUGO);
+MODULE_PARM_DESC(print_count, "Number of times to print 'Hello, world!'");
+
 static int __init hello_init(void)
 {
 	printk(KERN_EMERG "Hello, world!\n");
