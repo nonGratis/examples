@@ -43,8 +43,8 @@ MODULE_LICENSE("Dual BSD/GPL");
 
 /* Встановлюємо стуртуру елементів */
 struct hello_entry {
-    struct list_head list;
-    ktime_t time;
+	struct list_head list;
+	ktime_t time;
 };
 
 /* Оголошуємо глобально */
@@ -52,34 +52,32 @@ static LIST_HEAD(hello_list);
 
 void print_hello(uint count)
 {
-    uint i;
-    struct hello_entry *entry;
+	uint i;
+	struct hello_entry *entry;
 
-    for (i = 0; i < count; i++) {
-        entry = kmalloc(sizeof(*entry), GFP_KERNEL);
-        if (!entry) {
-            pr_err("Memory allocation failed for list entry.\n");
-            return;
-        }
-        entry->time = ktime_get();
-        list_add_tail(&entry->list, &hello_list);
-        pr_info("Hello, world! Time: %llu ns\n", entry->time);
-    }
+	for (i = 0; i < count; i++) {
+		entry = kmalloc(sizeof(*entry), GFP_KERNEL);
+		if (!entry)
+			return;
+		entry->time = ktime_get();
+		list_add_tail(&entry->list, &hello_list);
+		pr_info("Hello, world! Time: %llu ns\n", entry->time);
+	}
 }
 EXPORT_SYMBOL(print_hello);
 
 /* Функція виходу з модуля */
 static void __exit hello1_exit(void)
 {
-    struct hello_entry *entry, *tmp;
+	struct hello_entry *entry, *tmp;
 
-    pr_info("Unloading hello1 module.\n");
-    list_for_each_entry_safe(entry, tmp, &hello_list, list) {
-        pr_info("Time: %llu ns\n", entry->time);
-        list_del(&entry->list);
-        kfree(entry);
-    }
+	pr_info("Unloading hello1 module.\n");
+
+	list_for_each_entry_safe(entry, tmp, &hello_list, list) {
+		pr_info("Time: %llu ns\n", entry->time);
+		list_del(&entry->list);
+		kfree(entry);
+	}
 }
 
 module_exit(hello1_exit);
-
