@@ -54,24 +54,14 @@ struct hello_entry {
 /* Оголошуємо глобально */
 static LIST_HEAD(hello_list);
 
-// Function prototype
-void print_hello(uint count);
-
-static int __init hello1_init(void)
-{
-    BUG_ON(print_count > 10);
-    print_hello(print_count);
-    return 0;
-}
-
 void print_hello(uint count)
 {
 	uint i;
 	struct hello_entry *entry;
 
 	if (count == 0 || (count > 4 && count < 11))
-	pr_warn("WARNING: %u elements requested, but should be 1-4\n",
-		count);
+		pr_warn("WARNING: %u elements requested, but should be 1-4\n",
+			count);
 
 	for (i = 0; i < count; i++) {
 		if (i == 4) // Примусова kmalloc в 5 ітерації
@@ -90,6 +80,13 @@ void print_hello(uint count)
 	}
 }
 EXPORT_SYMBOL(print_hello);
+
+static int __init hello1_init(void)
+{
+	BUG_ON(print_count > 10);
+	print_hello(print_count);
+	return 0;
+}
 
 /* Функція виходу з модуля */
 static void __exit hello1_exit(void)
