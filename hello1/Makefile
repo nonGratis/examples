@@ -1,13 +1,13 @@
-
 ifneq ($(KERNELRELEASE),)
 # kbuild part of makefile
-obj-m   := hello.o
+obj-m := hello1.o
+ccflags-y := -I$(M)/inc
 else
-# normal makefile
-KDIR ?= /lib/modules/`uname -r`/build
+# Normal makefile
+KDIR ?= /lib/modules/$(shell uname -r)/build
 
 default:
-	$(MAKE) -C $(KDIR) M=$$PWD
+	$(MAKE) -C $(KDIR) M=$(PWD)
 clean:
-	$(MAKE) -C $(KDIR) M=$$PWD clean
+	$(MAKE) -C $(KDIR) M=$(PWD) clean
 endif
