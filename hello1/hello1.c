@@ -55,19 +55,22 @@ void print_hello(uint count)
 	uint i;
 	struct hello_entry *entry;
 
-	BUG_ON(count == 0); // Додаємо BUG_ON для недійсних параметрів
+	BUG_ON(count > 10); // BUG_ON для хибних значень
+
+	if (count == 0 || (count > 4 && count < 11))
+		pr_warn("WARNING: %u elements requested, but should be 1-4\n",
+			count);
 
 	for (i = 0; i < count; i++) {
-		if (i == 4) { // Примусова помилку kmalloc на 5-й ітерації
+		if (i == 4) // Примусова kmalloc в 5 ітерації
 			entry = NULL;
-		} else {
+		else
 			entry = kmalloc(sizeof(*entry), GFP_KERNEL);
-		}
 		if (!entry)
-			return;
+			continue;
 		entry->time = ktime_get();
 		list_add_tail(&entry->list, &hello_list);
-		pr_info("Hello, world! Time: %llu ns\n", entry->time);
+		pr_emerg("Hello, world! Time: %llu ns\n", entry->time);
 	}
 }
 EXPORT_SYMBOL(print_hello);
@@ -77,10 +80,10 @@ static void __exit hello1_exit(void)
 {
 	struct hello_entry *entry, *tmp;
 
-	pr_info("Unloading hello1 module.\n");
+	pr_emerg("Unloading hello1 module.\n");
 
 	list_for_each_entry_safe(entry, tmp, &hello_list, list) {
-		pr_info("Time: %llu ns\n", entry->time);
+		pr_emerg("Time: %llu ns\n", entry->time);
 		list_del(&entry->list);
 		kfree(entry);
 	}
