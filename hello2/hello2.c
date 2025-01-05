@@ -46,22 +46,22 @@ MODULE_PARM_DESC(print_count, "Number of times to call print_hello()");
 
 static int __init hello2_init(void)
 {
-    pr_info("Loading hello2 module with print_count=%u\n", print_count);
+	pr_info("Loading hello2 module with print_count=%u\n", print_count);
 
-    if (print_count == 0 || (print_count >= 5 && print_count <= 10)) {
-        pr_warn("Warning: print_count is in the range of 0, 5-10.\n");
-    } else if (print_count > 10) {
-        pr_err("Error: print_count is greater than 10. Exiting with -EINVAL.\n");
-        return -EINVAL;
-    }
+	if (print_count == 0 || (print_count >= 5 && print_count <= 10)) {
+		pr_warn("Warning: print_count is in the range of 0, 5-10.\n");
+	} else if (print_count > 10) {
+		pr_err("Error: print_count is greater than 10. Exiting with -EINVAL.\n");
+		return -EINVAL;
+	}
 
-    print_hello(print_count);
-    return 0;
+	print_hello(print_count);
+	return 0;
 }
 
 static void __exit hello2_exit(void)
 {
-    pr_info("Unloading hello2 module.\n");
+	pr_info("Unloading hello2 module.\n");
 }
 
 module_init(hello2_init);
