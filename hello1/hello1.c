@@ -35,10 +35,10 @@
 #include <linux/printk.h>
 #include <linux/slab.h>
 #include <linux/ktime.h>
-#include <linux/moduleparam.h>
+#include "hello1.h"
 
 MODULE_AUTHOR("Andrii Shapovalov <shapovalov.andrii@lll.kpi.ua>");
-MODULE_DESCRIPTION("Hello, world in Linux Kernel Training");
+MODULE_DESCRIPTION("Hello1 Module - Exports print_hello()");
 MODULE_LICENSE("Dual BSD/GPL");
 
 /* Визначаємо параметри */
