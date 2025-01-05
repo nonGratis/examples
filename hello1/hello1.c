@@ -41,63 +41,45 @@ MODULE_AUTHOR("Andrii Shapovalov <shapovalov.andrii@lll.kpi.ua>");
 MODULE_DESCRIPTION("Hello1 Module - Exports print_hello()");
 MODULE_LICENSE("Dual BSD/GPL");
 
-/* Визначаємо параметри */
-static uint print_count = 1; /* Наше звичайне значення */
-module_param(print_count, uint, 0444);
-MODULE_PARM_DESC(print_count, "Number of times to print 'Hello, world!'");
-
 /* Встановлюємо стуртуру елементів */
 struct hello_entry {
-	struct list_head list;
-	ktime_t time;
+    struct list_head list;
+    ktime_t time;
 };
 
 /* Оголошуємо глобально */
 static LIST_HEAD(hello_list);
 
-/* Ініціалізуємо модуль */
-static int __init hello_init(void)
+void print_hello(uint count)
 {
-	uint i; /* Ініціалізуємо змінну для циклу */
-	struct hello_entry *entry;
+    uint i;
+    struct hello_entry *entry;
 
-	pr_info("Hello module loading with print_count=%u\n", print_count);
+    for (i = 0; i < count; i++) {
+        entry = kmalloc(sizeof(*entry), GFP_KERNEL);
+        if (!entry) {
+            pr_err("Memory allocation failed for list entry.\n");
+            return;
+        }
+        entry->time = ktime_get();
+        list_add_tail(&entry->list, &hello_list);
+        pr_info("Hello, world! Time: %llu ns\n", entry->time);
+    }
+}
+EXPORT_SYMBOL(print_hello);
 
-    /* Та необхідна валідація */
-	if (print_count == 0 || (print_count >= 5 && print_count <= 10)) {
-		pr_warn("Warning: print_count is in the range of 0, 5-10.\n");
-	} else if (print_count > 10) {
-		pr_err("Error: print_count is greater than 10. Exiting with -EINVAL.\n");
-		return -EINVAL;
-	}
+/* Функція виходу з модуля */
+static void __exit hello1_exit(void)
+{
+    struct hello_entry *entry, *tmp;
 
-    /* Друк повідомлень і запис часу */
-	for (i = 0; i < print_count; i++) {
-		entry = kmalloc(sizeof(*entry), GFP_KERNEL);
-		if (!entry)
-			return -ENOMEM;
-		entry->time = ktime_get();
-		list_add_tail(&entry->list, &hello_list);
-
-		pr_emerg("Hello, world! Time: %llu ns\n", entry->time);
-	}
-
-	return 0;
+    pr_info("Unloading hello1 module.\n");
+    list_for_each_entry_safe(entry, tmp, &hello_list, list) {
+        pr_info("Time: %llu ns\n", entry->time);
+        list_del(&entry->list);
+        kfree(entry);
+    }
 }
 
-static void __exit hello_exit(void)
-{
-	struct hello_entry *entry, *tmp;
+module_exit(hello1_exit);
 
-	pr_info("Hello module unloading.\n");
-
-    /* Звільняємо списки */
-	list_for_each_entry_safe(entry, tmp, &hello_list, list) {
-		pr_info("Time: %llu ns\n", entry->time);
-		list_del(&entry->list);
-		kfree(entry);
-	}
-}
-
-module_init(hello_init);
-module_exit(hello_exit);
