@@ -1,9 +1,9 @@
 ifneq ($(KERNELRELEASE),)
 # kbuild part of the makefile
 obj-m := hello1.o
-ccflags-y := -I$(M)/inc
+ccflags-y += -g -DDEBUG
 else
-# Normal makefile
+
 ARCH := arm
 CROSS_COMPILE := arm-linux-gnueabihf-
 KDIR ?= /lib/modules/$(shell uname -r)/build

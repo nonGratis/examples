@@ -12,11 +12,11 @@
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
  * 3. All advertising materials mentioning features or use of this software
- *    must display the following acknowledgement:
- *    This product includes software developed by the GlobalLogic.
+ *	must display the following acknowledgement:
+ *	This product includes software developed by the GlobalLogic.
  * 4. Neither the name of the GlobalLogic nor the
- *    names of its contributors may be used to endorse or promote products
- *    derived from this software without specific prior written permission.
+ *	names of its contributors may be used to endorse or promote products
+ *	derived from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY GLOBALLOGIC UKRAINE LLC ``AS IS`` AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
@@ -35,11 +35,15 @@
 #include <linux/printk.h>
 #include <linux/slab.h>
 #include <linux/ktime.h>
-#include "hello1.h"
+#include <linux/bug.h>
 
 MODULE_AUTHOR("Andrii Shapovalov <shapovalov.andrii@lll.kpi.ua>");
 MODULE_DESCRIPTION("Hello1 Module - Exports print_hello()");
 MODULE_LICENSE("Dual BSD/GPL");
+
+static uint print_count = 1;
+module_param(print_count, uint, 0444);
+MODULE_PARM_DESC(print_count, "Number of times to print hello");
 
 /* Встановлюємо стуртуру елементів */
 struct hello_entry {
@@ -50,24 +54,36 @@ struct hello_entry {
 /* Оголошуємо глобально */
 static LIST_HEAD(hello_list);
 
+// Function prototype
+void print_hello(uint count);
+
+static int __init hello1_init(void)
+{
+    BUG_ON(print_count > 10);
+    print_hello(print_count);
+    return 0;
+}
+
 void print_hello(uint count)
 {
 	uint i;
 	struct hello_entry *entry;
 
-	BUG_ON(count > 10); // BUG_ON для хибних значень
-
 	if (count == 0 || (count > 4 && count < 11))
-		pr_warn("WARNING: %u elements requested, but should be 1-4\n",
-			count);
+	pr_warn("WARNING: %u elements requested, but should be 1-4\n",
+		count);
 
 	for (i = 0; i < count; i++) {
 		if (i == 4) // Примусова kmalloc в 5 ітерації
 			entry = NULL;
 		else
 			entry = kmalloc(sizeof(*entry), GFP_KERNEL);
-		if (!entry)
+
+		if (!entry) {
+			pr_err("Failed to allocate memory\n");
 			continue;
+		}
+
 		entry->time = ktime_get();
 		list_add_tail(&entry->list, &hello_list);
 		pr_emerg("Hello, world! Time: %llu ns\n", entry->time);
@@ -78,15 +94,13 @@ EXPORT_SYMBOL(print_hello);
 /* Функція виходу з модуля */
 static void __exit hello1_exit(void)
 {
-	struct hello_entry *entry, *tmp;
+	struct hello_entry *entry, *temp;
 
-	pr_emerg("Unloading hello1 module.\n");
-
-	list_for_each_entry_safe(entry, tmp, &hello_list, list) {
-		pr_emerg("Time: %llu ns\n", entry->time);
+	list_for_each_entry_safe(entry, temp, &hello_list, list) {
 		list_del(&entry->list);
 		kfree(entry);
 	}
 }
 
+module_init(hello1_init);
 module_exit(hello1_exit);
