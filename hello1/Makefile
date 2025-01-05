@@ -1,13 +1,15 @@
 ifneq ($(KERNELRELEASE),)
-# kbuild part of makefile
+# kbuild part of the makefile
 obj-m := hello1.o
-ccflags-y := -I$(M)/inc -DDEBUG
+ccflags-y := -I$(M)/inc
 else
 # Normal makefile
+ARCH := arm
+CROSS_COMPILE := arm-linux-gnueabihf-
 KDIR ?= /lib/modules/$(shell uname -r)/build
 
 default:
-	$(MAKE) -C $(KDIR) M=$(PWD) EXTRA_CFLAGS+=-DDEBUG
+	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -C $(KDIR) M=$(PWD)
 clean:
-	$(MAKE) -C $(KDIR) M=$(PWD) clean
+	$(MAKE) ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE) -C $(KDIR) M=$(PWD) clean
 endif
