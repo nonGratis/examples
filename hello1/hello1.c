@@ -55,8 +55,14 @@ void print_hello(uint count)
 	uint i;
 	struct hello_entry *entry;
 
+	BUG_ON(count == 0); // Додаємо BUG_ON для недійсних параметрів
+
 	for (i = 0; i < count; i++) {
-		entry = kmalloc(sizeof(*entry), GFP_KERNEL);
+		if (i == 4) { // Примусова помилку kmalloc на 5-й ітерації
+			entry = NULL;
+		} else {
+			entry = kmalloc(sizeof(*entry), GFP_KERNEL);
+		}
 		if (!entry)
 			return;
 		entry->time = ktime_get();
